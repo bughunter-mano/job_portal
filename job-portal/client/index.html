@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeClub Jobs & Verification Registry</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#001C3D', // CodeClub Deep Navy
+            paper: '#F4F8FF', // CodeClub Soft Sky White
+            gold: {
+              DEFAULT: '#E3A62F', // Amber Gold
+              dark: '#C68A1C'
+            },
+            teal: {
+              DEFAULT: '#005AE6', // CodeClub Vibrant Royal Blue
+              light: '#E6F0FF' // Light Blue tags backdrop
+            },
+            muted: '#526075', // Tech Slate Gray
+            hair: '#E0E6ED' // Tech border line color
+          },
+          fontFamily: {
+            display: ['Inter', 'sans-serif'], // CodeClub uses clean sans-serif for headings
+            sans: ['Inter', 'sans-serif'],
+            mono: ['"IBM Plex Mono"', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-paper font-sans text-ink">
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>

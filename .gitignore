@@ -1,0 +1,26 @@
+# Node modules
+**/node_modules/
+node_modules/
+
+# Environment files
+**/.env
+**/.env.local
+.env
+
+# Build outputs
+**/dist/
+**/build/
+dist/
+build/
+
+# Database data & logs
+**/db_data/
+*.log
+.DS_Store
+.vercel/
+
+# Resumes and image uploads
+**/uploads/resumes/*
+!**/uploads/resumes/.gitkeep
+**/uploads/images/*
+!**/uploads/images/.gitkeep
