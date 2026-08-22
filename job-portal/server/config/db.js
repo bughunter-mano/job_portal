@@ -4,6 +4,9 @@ const fs = require('fs');
 require('dotenv').config();
 
 async function connectDB() {
+  if (mongoose.connection.readyState >= 1) {
+    return;
+  }
   let uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/job_portal';
   try {
     await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
