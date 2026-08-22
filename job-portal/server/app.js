@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 // Serve uploaded resumes statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// API routes
+// API routes (with /api prefix)
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin', imageUploadRoutes);
 app.use('/api/jobs', jobRoutes);
@@ -32,6 +32,17 @@ app.use('/api/clients', clientRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/testimonials', testimonialRoutes);
 app.use('/api/certificates', certificateRoutes);
+
+// Fallback routes (without /api prefix) to prevent 404 Route Not Found
+app.use('/admin', adminRoutes);
+app.use('/admin', imageUploadRoutes);
+app.use('/jobs', jobRoutes);
+app.use('/applications', applicationRoutes);
+app.use('/notifications', notificationRoutes);
+app.use('/clients', clientRoutes);
+app.use('/projects', projectRoutes);
+app.use('/testimonials', testimonialRoutes);
+app.use('/certificates', certificateRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Job Portal API is running' });
