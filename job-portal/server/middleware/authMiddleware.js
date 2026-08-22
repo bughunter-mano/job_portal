@@ -8,7 +8,8 @@ function verifyAdmin(req, res, next) {
     return res.status(401).json({ success: false, message: 'No token provided. Please login.' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+  const jwtSecret = process.env.JWT_SECRET || 'job_portal_super_secret_jwt_key_2026';
+  jwt.verify(token, jwtSecret, (err, decoded) => {
     if (err) {
       return res.status(403).json({ success: false, message: 'Invalid or expired token' });
     }
