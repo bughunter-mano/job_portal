@@ -20,7 +20,9 @@ export default function AdminLogin() {
       login(res.data.admin, res.data.token);
       navigate('/admin/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      console.error('Login error:', err);
+      const msg = err.response?.data?.message || err.message || 'Login failed';
+      setError(msg === 'Network Error' ? 'Network Error: Cannot connect to Backend API. Please check VITE_API_URL.' : msg);
     } finally {
       setLoading(false);
     }
