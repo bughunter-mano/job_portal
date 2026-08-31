@@ -148,6 +148,32 @@ export default function Applications() {
                         {app.name}
                       </Link>
                       <p className="text-gray-500 text-xs">{app.email}</p>
+                      {(app.linkedin || app.github) && (
+                        <div className="flex gap-2 mt-1">
+                          {app.linkedin && (
+                            <a
+                              href={app.linkedin.startsWith('http') ? app.linkedin : `https://${app.linkedin}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-[11px] text-teal hover:underline font-mono"
+                              title="LinkedIn Profile"
+                            >
+                              LinkedIn ↗
+                            </a>
+                          )}
+                          {app.github && (
+                            <a
+                              href={app.github.startsWith('http') ? app.github : `https://${app.github}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-[11px] text-gray-700 hover:underline font-mono"
+                              title="GitHub Profile"
+                            >
+                              GitHub ↗
+                            </a>
+                          )}
+                        </div>
+                      )}
                     </td>
                     <td className="p-3">{app.job_title}</td>
                     <td className="p-3">{new Date(app.applied_at).toLocaleDateString()}</td>

@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Application = require('../models/Application');
 const Notification = require('../models/Notification');
 const Job = require('../models/Job');
@@ -9,10 +10,27 @@ const fs = require('fs');
 // POST /api/applications  (public - candidate applies)
 async function createApplication(req, res) {
   try {
-    const { job_id, name, email, phone, address, education, experience, skills, cover_letter } = req.body;
+    const { job_id, name, email, phone, address, education, experience, skills, linkedin, github, cover_letter } = req.body;
 
-    if (!job_id || !name || !email || !phone) {
-      return res.status(400).json({ success: false, message: 'job_id, name, email, and phone are required' });
+    if (!job_id || !name || !email || !phone || !linkedin) {
+      return res.status(400).json({ success: false, message: 'job_id, name, email, phone, and linkedin are required' });
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email.trim())) {
+      return res.status(400).json({ success: false, message: 'Invalid email address format' });
+    }
+
+    const linkedinRegex = /^(https?:\/\/)?(www\.)?linkedin\.com\/.+$/i;
+    if (!linkedinRegex.test(linkedin.trim())) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid LinkedIn profile URL (e.g. https://linkedin.com/in/username)' });
+    }
+
+    if (github && github.trim()) {
+      const githubRegex = /^(https?:\/\/)?(www\.)?github\.com\/.+$/i;
+      if (!githubRegex.test(github.trim())) {
+        return res.status(400).json({ success: false, message: 'Please provide a valid GitHub profile URL (e.g. https://github.com/username)' });
+      }
     }
 
     // Verify that the job is available
@@ -63,6 +81,8 @@ async function createApplication(req, res) {
 
     const application = await Application.create({
       job_id, name, email, phone, address, education, experience, skills,
+      linkedin: linkedin ? linkedin.trim() : undefined,
+      github: github ? github.trim() : undefined,
       resume: resumePath, cover_letter
     });
 
@@ -124,6 +144,10 @@ async function getAllApplications(req, res) {
 // GET /api/applications/:id  (admin only)
 async function getApplicationById(req, res) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ success: false, message: 'Application not found' });
+    }
+
     const app = await Application.findById(req.params.id).populate('job_id', 'title company');
     if (!app) {
       return res.status(404).json({ success: false, message: 'Application not found' });
@@ -143,6 +167,10 @@ async function getApplicationById(req, res) {
 // PUT /api/applications/:id/status  (admin only) body: { status: 'Accepted' | 'Rejected' }
 async function updateApplicationStatus(req, res) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ success: false, message: 'Application not found' });
+    }
+
     const { status } = req.body;
     if (!['Pending', 'Accepted', 'Rejected'].includes(status)) {
       return res.status(400).json({ success: false, message: 'Status must be Pending, Accepted, or Rejected' });

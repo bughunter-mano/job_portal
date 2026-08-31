@@ -10,6 +10,8 @@ const applicationSchema = new mongoose.Schema(
     education: { type: String, maxlength: 150 },
     experience: { type: String, maxlength: 150 },
     skills: { type: String, maxlength: 255 },
+    linkedin: { type: String, required: true, maxlength: 255 },
+    github: { type: String, maxlength: 255 },
     resume: { type: String, required: true },
     cover_letter: { type: String, maxlength: 1000 },
     status: { type: String, enum: ['Pending', 'Accepted', 'Rejected'], default: 'Pending' }

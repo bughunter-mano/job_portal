@@ -5,7 +5,8 @@ import DeleteConfirmModal from '../../components/DeleteConfirmModal.jsx';
 
 const LIMITS = {
   name: 100,
-  about: 500,
+  service: 150,
+  description: 800,
   order: 9999
 };
 
@@ -30,8 +31,9 @@ export default function AdminClients() {
 
   const [form, setForm] = useState({
     name: '',
+    service: '',
     logo: '',
-    about: '',
+    description: '',
     order: 0
   });
 
@@ -41,7 +43,7 @@ export default function AdminClients() {
     setLoading(true);
     api.get('/clients')
       .then((res) => setClients(res.data.clients || []))
-      .catch((err) => setError('Failed to fetch clients.'))
+      .catch(() => setError('Failed to fetch clients.'))
       .finally(() => setLoading(false));
   }
 
@@ -49,13 +51,20 @@ export default function AdminClients() {
     loadClients();
   }, []);
 
+  const getLogoUrl = (logoPath) => {
+    if (!logoPath) return null;
+    if (logoPath.startsWith('http://') || logoPath.startsWith('https://')) return logoPath;
+    if (logoPath.startsWith('/assets/')) return logoPath;
+    if (logoPath.startsWith('/uploads/')) return `${BASE_URL}${logoPath}`;
+    return `/assets/clients/${logoPath}`;
+  };
+
   async function handleImageUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
-    
-    // Size check: limit to 2MB for logos
-    if (file.size > 2 * 1024 * 1024) {
-      alert('Logo image must be under 2MB.');
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Logo image must be under 5MB.');
       return;
     }
 
@@ -68,7 +77,7 @@ export default function AdminClients() {
       });
       setForm((prev) => ({ ...prev, logo: res.data.url }));
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to upload image');
+      alert(err.response?.data?.message || 'Failed to upload logo');
     } finally {
       setUploading(false);
     }
@@ -76,7 +85,7 @@ export default function AdminClients() {
 
   function handleOpenCreate() {
     setEditingId(null);
-    setForm({ name: '', logo: '', about: '', order: 0 });
+    setForm({ name: '', service: '', logo: '', description: '', order: 0 });
     setError('');
     setShowModal(true);
   }
@@ -85,8 +94,9 @@ export default function AdminClients() {
     setEditingId(client.id);
     setForm({
       name: client.name || '',
+      service: client.service || '',
       logo: client.logo || '',
-      about: client.about || '',
+      description: client.description || client.about || '',
       order: client.order || 0
     });
     setError('');
@@ -97,26 +107,30 @@ export default function AdminClients() {
     e.preventDefault();
     setError('');
 
-    // Client-side validations
     if (form.name.trim().length < 2) {
-      setError('Client name must be at least 2 characters.');
+      setError('Business / Client name must be at least 2 characters.');
       return;
     }
 
-    const nameRegex = /^[a-zA-Z0-9\s\-\.\&]+$/;
-    if (!nameRegex.test(form.name.trim())) {
-      setError('Client Name contains invalid characters. Only letters, numbers, spaces, dots, hyphens, and ampersands are allowed.');
-      return;
-    }
-
-    if (form.about.trim() && /[<>]/g.test(form.about)) {
-      setError('About description cannot contain HTML tags or angle brackets (<, >).');
+    if (form.description.trim() && /[<>]/g.test(form.description)) {
+      setError('Description cannot contain HTML tags or angle brackets (<, >).');
       return;
     }
 
     if (form.order < 0 || form.order > LIMITS.order) {
       setError(`Display order must be between 0 and ${LIMITS.order}.`);
       return;
+    }
+
+    const orderNum = Number(form.order);
+    if (orderNum > 0) {
+      const duplicateOrderClient = clients.find(
+        (c) => Number(c.order) === orderNum && c.id !== editingId
+      );
+      if (duplicateOrderClient) {
+        setError(`Display order #${orderNum} is already assigned to "${duplicateOrderClient.name}". Please choose another order number.`);
+        return;
+      }
     }
 
     try {
@@ -154,28 +168,32 @@ export default function AdminClients() {
       <main className="flex-1 p-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-bold font-display text-ink">Clients</h1>
-            <p className="text-muted text-sm mt-1">Manage client logos, information, and priority ordering on the landing page.</p>
+            <h1 className="text-2xl font-bold font-display text-ink">Our Clients & Partners</h1>
+            <p className="text-muted text-sm mt-1">
+              Manage client logos, business titles, services provided, descriptions, and ordering.
+            </p>
           </div>
           <button
             onClick={handleOpenCreate}
-            className="bg-ink text-paper px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-teal transition-colors"
+            className="bg-ink text-paper px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-teal transition-colors flex items-center gap-2"
           >
-            + Add Client
+            <span>+</span>
+            <span>Add Client</span>
           </button>
         </div>
 
         {loading ? (
-          <p className="text-muted">Loading clients...</p>
+          <p className="text-muted font-mono text-sm">Loading clients...</p>
         ) : (
           <div className="overflow-x-auto border border-hair rounded-xl bg-white shadow-sm">
             <table className="w-full text-sm text-ink">
               <thead className="bg-teal-light text-left font-mono uppercase text-xs tracking-wider text-teal">
                 <tr>
                   <th className="p-4 border-b border-hair">Logo</th>
-                  <th className="p-4 border-b border-hair">Name</th>
-                  <th className="p-4 border-b border-hair">About</th>
-                  <th className="p-4 border-b border-hair">Display Order</th>
+                  <th className="p-4 border-b border-hair">Business Name</th>
+                  <th className="p-4 border-b border-hair">Service Provided</th>
+                  <th className="p-4 border-b border-hair">Description</th>
+                  <th className="p-4 border-b border-hair">Order</th>
                   <th className="p-4 border-b border-hair">Actions</th>
                 </tr>
               </thead>
@@ -183,11 +201,11 @@ export default function AdminClients() {
                 {clients.map((client) => (
                   <tr key={client.id} className="hover:bg-teal-light/20 transition-colors">
                     <td className="p-4">
-                      {client.logo ? (
+                      {getLogoUrl(client.logo) ? (
                         <img
-                          src={client.logo.startsWith('http') ? client.logo : `${BASE_URL}${client.logo}`}
+                          src={getLogoUrl(client.logo)}
                           alt={client.name}
-                          className="h-10 w-24 object-contain bg-paper p-1 border rounded"
+                          className="h-10 w-24 object-contain bg-paper p-1 border rounded-lg"
                         />
                       ) : (
                         <div className="h-10 w-24 flex items-center justify-center text-xs text-muted bg-paper rounded border border-dashed font-mono">
@@ -195,8 +213,15 @@ export default function AdminClients() {
                         </div>
                       )}
                     </td>
-                    <td className="p-4 font-semibold">{client.name}</td>
-                    <td className="p-4 max-w-xs truncate text-muted">{client.about || '-'}</td>
+                    <td className="p-4 font-semibold text-ink">{client.name}</td>
+                    <td className="p-4 text-xs font-mono text-teal">
+                      <span className="px-2.5 py-1 rounded-md bg-teal/10">
+                        {client.service || 'Software Solutions'}
+                      </span>
+                    </td>
+                    <td className="p-4 max-w-xs truncate text-muted text-xs">
+                      {client.description || client.about || '-'}
+                    </td>
                     <td className="p-4 font-mono text-teal font-semibold">{client.order}</td>
                     <td className="p-4">
                       <div className="flex gap-4">
@@ -218,8 +243,8 @@ export default function AdminClients() {
                 ))}
                 {clients.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="p-8 text-center text-muted font-medium">
-                      No clients found. Add some clients to display on the public website.
+                    <td colSpan="6" className="p-8 text-center text-muted font-medium">
+                      No clients found. Click "+ Add Client" to create your first client entry.
                     </td>
                   </tr>
                 )}
@@ -231,28 +256,50 @@ export default function AdminClients() {
         {/* Modal Form */}
         {showModal && (
           <div className="fixed inset-0 bg-ink/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-paper border border-hair rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl relative animate-in fade-in zoom-in duration-200">
+            <div className="bg-paper border border-hair rounded-2xl p-6 md:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl relative animate-in fade-in zoom-in duration-200">
               <h2 className="text-xl font-bold font-display text-ink mb-4">
                 {editingId ? 'Edit Client' : 'Add New Client'}
               </h2>
               {error && <p className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-xs font-semibold">{error}</p>}
               <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Title / Business Name */}
                 <div>
-                  <label className="text-xs font-mono uppercase text-muted block mb-1">Client Name *</label>
+                  <label className="text-xs font-mono uppercase text-muted block mb-1 font-semibold">
+                    Title / Business Name *
+                  </label>
                   <input
                     type="text"
                     required
                     maxLength={LIMITS.name}
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full border border-hair rounded-xl px-4 py-2.5 bg-white focus:outline-none focus:border-teal text-sm"
-                    placeholder="e.g. ApexCorp"
+                    className="w-full border border-hair rounded-xl px-4 py-2.5 bg-white focus:outline-none focus:border-teal text-sm text-ink"
+                    placeholder="e.g. Peshawar Services Club"
                   />
                   <CharCounter current={form.name.length} max={LIMITS.name} />
                 </div>
 
+                {/* Service We Provide */}
                 <div>
-                  <label className="text-xs font-mono uppercase text-muted block mb-1">Logo Image (Max 2MB)</label>
+                  <label className="text-xs font-mono uppercase text-muted block mb-1 font-semibold">
+                    Service We Provide / Focus Area
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={LIMITS.service}
+                    value={form.service}
+                    onChange={(e) => setForm({ ...form, service: e.target.value })}
+                    className="w-full border border-hair rounded-xl px-4 py-2.5 bg-white focus:outline-none focus:border-teal text-sm text-ink"
+                    placeholder="e.g. App & Management System, WhatsApp Automation, ERP Portal"
+                  />
+                  <CharCounter current={form.service.length} max={LIMITS.service} />
+                </div>
+
+                {/* Logo Picture Upload */}
+                <div>
+                  <label className="text-xs font-mono uppercase text-muted block mb-1 font-semibold">
+                    Logo of the Service / Client (Max 5MB)
+                  </label>
                   <div className="flex items-center gap-4">
                     <input
                       type="file"
@@ -263,9 +310,9 @@ export default function AdminClients() {
                     {uploading && <span className="text-xs text-teal font-mono animate-pulse">Uploading...</span>}
                   </div>
                   {form.logo && (
-                    <div className="mt-2 p-2 border border-hair rounded bg-white w-32 h-16 flex items-center justify-center">
+                    <div className="mt-3 p-2 border border-hair rounded-xl bg-white w-36 h-20 flex items-center justify-center">
                       <img
-                        src={form.logo.startsWith('http') ? form.logo : `${BASE_URL}${form.logo}`}
+                        src={getLogoUrl(form.logo)}
                         alt="Logo preview"
                         className="max-h-full max-w-full object-contain"
                       />
@@ -273,31 +320,38 @@ export default function AdminClients() {
                   )}
                 </div>
 
+                {/* Description */}
                 <div>
-                  <label className="text-xs font-mono uppercase text-muted block mb-1">About / Description</label>
+                  <label className="text-xs font-mono uppercase text-muted block mb-1 font-semibold">
+                    Description
+                  </label>
                   <textarea
-                    rows="3"
-                    maxLength={LIMITS.about}
-                    value={form.about}
-                    onChange={(e) => setForm({ ...form, about: e.target.value })}
-                    className="w-full border border-hair rounded-xl px-4 py-2.5 bg-white focus:outline-none focus:border-teal text-sm"
-                    placeholder="Short description of client services..."
+                    rows="4"
+                    maxLength={LIMITS.description}
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    className="w-full border border-hair rounded-xl px-4 py-2.5 bg-white focus:outline-none focus:border-teal text-sm text-ink leading-relaxed"
+                    placeholder="Describe the solution built, business impact, or client overview..."
                   />
-                  <CharCounter current={form.about.length} max={LIMITS.about} />
+                  <CharCounter current={form.description.length} max={LIMITS.description} />
                 </div>
 
+                {/* Order */}
                 <div>
-                  <label className="text-xs font-mono uppercase text-muted block mb-1">Display Order (e.g. 1 shows first)</label>
+                  <label className="text-xs font-mono uppercase text-muted block mb-1 font-semibold">
+                    Display Order (e.g. 1 shows first)
+                  </label>
                   <input
                     type="number"
                     min="0"
                     max={LIMITS.order}
                     value={form.order}
                     onChange={(e) => setForm({ ...form, order: parseInt(e.target.value) || 0 })}
-                    className="w-full border border-hair rounded-xl px-4 py-2.5 bg-white focus:outline-none focus:border-teal text-sm"
+                    className="w-full border border-hair rounded-xl px-4 py-2.5 bg-white focus:outline-none focus:border-teal text-sm text-ink"
                   />
                 </div>
 
+                {/* Action Buttons */}
                 <div className="flex justify-end gap-3 pt-4 border-t border-hair">
                   <button
                     type="button"
@@ -308,15 +362,16 @@ export default function AdminClients() {
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2.5 rounded-full bg-ink text-paper text-sm font-semibold hover:bg-teal transition-colors"
+                    className="px-6 py-2.5 rounded-full bg-ink text-paper text-sm font-semibold hover:bg-teal transition-colors"
                   >
-                    Save
+                    Save Client
                   </button>
                 </div>
               </form>
             </div>
           </div>
         )}
+
         {/* Delete Confirmation Modal */}
         <DeleteConfirmModal
           show={deleteConfirm.show}

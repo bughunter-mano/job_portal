@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
 const Job = require('../models/Job');
 const Application = require('../models/Application');
+const News = require('../models/News');
 const { seedAdminAuto, seedContent } = require('../seed');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'job_portal_super_secret_jwt_key_2026';
@@ -70,18 +71,19 @@ async function setup(req, res) {
 // GET /api/admin/dashboard
 async function dashboard(req, res) {
   try {
-    const [totalJobs, activeJobs, totalApplications, pending, accepted, rejected] = await Promise.all([
+    const [totalJobs, activeJobs, totalApplications, pending, accepted, rejected, totalNews] = await Promise.all([
       Job.countDocuments(),
       Job.countDocuments({ status: 'active' }),
       Application.countDocuments(),
       Application.countDocuments({ status: 'Pending' }),
       Application.countDocuments({ status: 'Accepted' }),
-      Application.countDocuments({ status: 'Rejected' })
+      Application.countDocuments({ status: 'Rejected' }),
+      News.countDocuments()
     ]);
 
     res.json({
       success: true,
-      stats: { totalJobs, activeJobs, totalApplications, pending, accepted, rejected }
+      stats: { totalJobs, activeJobs, totalApplications, pending, accepted, rejected, totalNews }
     });
   } catch (err) {
     console.error(err);

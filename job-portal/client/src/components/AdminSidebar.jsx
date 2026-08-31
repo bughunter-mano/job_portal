@@ -36,6 +36,8 @@ export default function AdminSidebar() {
         <Link to="/admin/applications" className={linkClass('/admin/applications')}>Applications</Link>
         <Link to="/admin/certificates" className={linkClass('/admin/certificates')}>Certificates</Link>
         <div className="border-t border-white/10 my-2"></div>
+        <Link to="/admin/messages" className={linkClass('/admin/messages')}>Messages</Link>
+        <Link to="/admin/news" className={linkClass('/admin/news')}>News & Media</Link>
         <Link to="/admin/clients" className={linkClass('/admin/clients')}>Clients</Link>
         <Link to="/admin/projects" className={linkClass('/admin/projects')}>Projects</Link>
         <Link to="/admin/testimonials" className={linkClass('/admin/testimonials')}>Testimonials</Link>

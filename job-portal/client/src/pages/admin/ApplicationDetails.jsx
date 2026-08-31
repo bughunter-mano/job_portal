@@ -44,8 +44,34 @@ export default function ApplicationDetails() {
           <p><span className="font-medium">Phone:</span> {app.phone}</p>
           {app.address && <p><span className="font-medium">Address:</span> {app.address}</p>}
           {app.education && <p><span className="font-medium">Education:</span> {app.education}</p>}
-          {app.experience && <p><span className="font-medium">Experience:</span> {app.experience}</p>}
+          {app.experience && <p><span className="font-medium">Experience:</span> {app.experience} {app.experience === '1' ? 'Year' : 'Years'}</p>}
           {app.skills && <p><span className="font-medium">Skills:</span> {app.skills}</p>}
+          {app.linkedin && (
+            <p>
+              <span className="font-medium">LinkedIn:</span>{' '}
+              <a
+                href={app.linkedin.startsWith('http') ? app.linkedin : `https://${app.linkedin}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-teal hover:underline font-semibold inline-flex items-center gap-1 break-all"
+              >
+                {app.linkedin} ↗
+              </a>
+            </p>
+          )}
+          {app.github && (
+            <p>
+              <span className="font-medium">GitHub:</span>{' '}
+              <a
+                href={app.github.startsWith('http') ? app.github : `https://${app.github}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-teal hover:underline font-semibold inline-flex items-center gap-1 break-all"
+              >
+                {app.github} ↗
+              </a>
+            </p>
+          )}
           {app.cover_letter && (
             <div>
               <p className="font-medium mb-1">Cover Letter:</p>

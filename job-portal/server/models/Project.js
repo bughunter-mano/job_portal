@@ -3,10 +3,13 @@ const mongoose = require('mongoose');
 const projectSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
+    projectType: { type: String }, // e.g. "Full-Stack", "Mobile App", "AI/ML", "E-Commerce", "SaaS"
     description: { type: String },
-    image: { type: String }, // path/URL to project showcase image
-    techStack: { type: String }, // comma-separated values, e.g. "React, Node.js, MongoDB"
-    link: { type: String }, // live link or github link
+    image: { type: String }, // path/URL to case study / project showcase image
+    tags: [{ type: String }], // Array of tags
+    techStack: { type: String }, // Comma-separated tags string for backward compatibility
+    link: { type: String }, // Live link or website URL
+    liveLink: { type: String }, // Alias for link
     order: { type: Number, default: 0 }
   },
   {

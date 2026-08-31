@@ -13,6 +13,8 @@ const LIMITS = {
   education: 150,
   experience: 150,
   skills: 255,
+  linkedin: 255,
+  github: 255,
   cover_letter: 1000
 };
 
@@ -166,15 +168,25 @@ export default function ApplyJob() {
 
       Object.keys(data).forEach((key) => {
         if (key === 'resume') {
-          formData.append('resume', data.resume[0]);
+          if (data.resume && data.resume[0]) {
+            formData.append('resume', data.resume[0]);
+          }
         } else if (key === 'phone') {
           // Combine selected country code and digit-only phone number
           const combinedPhone = `${countryCode} ${data.phone.trim()}`;
           formData.append('phone', combinedPhone);
         } else if (key === 'education' && data.education === 'Other') {
-          formData.append('education', data.custom_education.trim());
+          formData.append('education', data.custom_education ? data.custom_education.trim() : 'Other');
+        } else if (key === 'linkedin' || key === 'github') {
+          const val = data[key]?.trim();
+          if (val) {
+            const formattedUrl = val.startsWith('http://') || val.startsWith('https://') ? val : `https://${val}`;
+            formData.append(key, formattedUrl);
+          }
         } else if (key !== 'first_name' && key !== 'last_name' && key !== 'custom_education') {
-          formData.append(key, data[key]);
+          if (data[key] !== undefined && data[key] !== null) {
+            formData.append(key, data[key]);
+          }
         }
       });
 
@@ -273,19 +285,16 @@ export default function ApplyJob() {
           <input
             type="email"
             placeholder="john.doe@example.com"
-            maxLength={LIMITS.email}
             className={inputClass}
             {...register('email', { 
               required: 'Email is required', 
-              maxLength: LIMITS.email,
-              pattern: { value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: 'Invalid email address format' }
+              pattern: { 
+                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 
+                message: 'Please enter a valid email address (e.g. name@example.com)' 
+              }
             })}
           />
-          <div className="flex justify-between items-start mt-1">
-            {errors.email && <p className={errorClass}>{errors.email.message}</p>}
-            <div className="flex-1" />
-            <CharCounter current={watch('email')?.length || 0} max={LIMITS.email} />
-          </div>
+          {errors.email && <p className={errorClass}>{errors.email.message}</p>}
         </div>
 
         <div>
@@ -467,6 +476,56 @@ export default function ApplyJob() {
             )}
           </div>
           {errors.skills && <p className={errorClass}>{errors.skills.message}</p>}
+        </div>
+
+        {/* Professional & Social Profiles */}
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <FieldLabel required>LinkedIn profile</FieldLabel>
+            <div className="relative mt-1.5">
+              <input
+                type="text"
+                placeholder="https://linkedin.com/in/username"
+                className={inputClass}
+                {...register('linkedin', {
+                  required: 'LinkedIn profile URL is required',
+                  validate: (val) => {
+                    if (!val || !val.trim()) return 'LinkedIn profile URL is required';
+                    const cleanVal = val.trim();
+                    const urlPattern = /^(https?:\/\/)?(www\.)?linkedin\.com\/(in|company)\/[a-zA-Z0-9_\-–%]+\/?.*$/i;
+                    if (!urlPattern.test(cleanVal)) {
+                      return 'Please enter a valid LinkedIn URL (e.g. https://linkedin.com/in/username)';
+                    }
+                    return true;
+                  }
+                })}
+              />
+            </div>
+            {errors.linkedin && <p className={errorClass}>{errors.linkedin.message}</p>}
+          </div>
+
+          <div>
+            <FieldLabel>GitHub profile <span className="text-muted font-normal text-xs">(optional)</span></FieldLabel>
+            <div className="relative mt-1.5">
+              <input
+                type="text"
+                placeholder="https://github.com/username"
+                className={inputClass}
+                {...register('github', {
+                  validate: (val) => {
+                    if (!val || !val.trim()) return true;
+                    const cleanVal = val.trim();
+                    const urlPattern = /^(https?:\/\/)?(www\.)?github\.com\/[a-zA-Z0-9\-_.]+\/?$/i;
+                    if (!urlPattern.test(cleanVal)) {
+                      return 'Please enter a valid GitHub URL (e.g. https://github.com/username)';
+                    }
+                    return true;
+                  }
+                })}
+              />
+            </div>
+            {errors.github && <p className={errorClass}>{errors.github.message}</p>}
+          </div>
         </div>
 
         <div>

@@ -9,11 +9,27 @@ export default function Home() {
   const [clients, setClients] = useState([]);
   const [projects, setProjects] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
+  const [news, setNews] = useState([]);
+  const [selectedNews, setSelectedNews] = useState(null);
   const [selectedClient, setSelectedClient] = useState(null);
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
 
   const navigate = useNavigate();
   const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+
+  const getImageUrl = (imgPath) => {
+    if (!imgPath) return null;
+    if (imgPath.startsWith('http://') || imgPath.startsWith('https://')) {
+      return imgPath;
+    }
+    if (imgPath.startsWith('/assets/')) {
+      return imgPath;
+    }
+    if (imgPath.startsWith('/uploads/')) {
+      return `${BASE_URL}${imgPath}`;
+    }
+    return `/assets/news/${imgPath}`;
+  };
 
   useEffect(() => {
     // Load latest jobs
@@ -34,6 +50,11 @@ export default function Home() {
     // Load testimonials
     api.get('/testimonials')
       .then((res) => setTestimonials(res.data.testimonials || []))
+      .catch(() => {});
+
+    // Load latest news
+    api.get('/news?limit=3')
+      .then((res) => setNews(res.data.news || []))
       .catch(() => {});
   }, []);
 
@@ -123,10 +144,12 @@ export default function Home() {
               )}
               <div>
                 <h3 className="font-bold text-lg">{selectedClient.name}</h3>
-                <p className="text-xs font-mono text-muted">Partner Client</p>
+                {selectedClient.service && (
+                  <p className="text-xs font-mono text-teal font-medium">{selectedClient.service}</p>
+                )}
               </div>
             </div>
-            <p className="text-muted text-sm leading-relaxed">{selectedClient.about || 'No information available.'}</p>
+            <p className="text-muted text-sm leading-relaxed">{selectedClient.description || selectedClient.about || 'No information available.'}</p>
           </div>
         </div>
       )}
@@ -136,8 +159,8 @@ export default function Home() {
         <section className="max-w-6xl mx-auto px-5 py-16">
           <div className="flex items-baseline justify-between mb-8">
             <div>
-              <p className="font-mono text-xs tracking-[0.2em] uppercase text-teal mb-2">Our Work</p>
-              <h2 className="font-display text-2xl md:text-3xl text-ink font-semibold">Featured Projects</h2>
+              <p className="font-mono text-xs tracking-[0.2em] uppercase text-teal mb-2">Our Work & Case Studies</p>
+              <h2 className="font-display text-2xl md:text-3xl text-ink font-semibold">Featured Projects & Case Studies</h2>
             </div>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
@@ -147,41 +170,46 @@ export default function Home() {
                 className="bg-white border border-hair rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group"
               >
                 {project.image ? (
-                  <div className="h-36 w-full overflow-hidden bg-teal-light/50 relative">
+                  <div className="h-44 w-full overflow-hidden bg-teal-light/50 relative">
                     <img
                       src={project.image.startsWith('http') ? project.image : `${BASE_URL}${project.image}`}
                       alt={project.title}
                       className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
+                    {project.projectType && (
+                      <span className="absolute top-2.5 right-2.5 bg-ink/80 backdrop-blur text-paper text-[10px] font-mono px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                        {project.projectType}
+                      </span>
+                    )}
                   </div>
                 ) : (
-                  <div className="h-36 w-full bg-teal-light flex items-center justify-center font-display text-teal text-base font-bold">
+                  <div className="h-44 w-full bg-teal-light flex items-center justify-center font-display text-teal text-base font-bold">
                     {project.title}
                   </div>
                 )}
-                <div className="p-4 flex-1 flex flex-col justify-between">
+                <div className="p-5 flex-1 flex flex-col justify-between">
                   <div>
                     <h3 className="font-display text-base text-ink font-semibold group-hover:text-teal transition-colors duration-300">
                       {project.title}
                     </h3>
-                    <p className="text-muted text-xs mt-1.5 leading-relaxed">{project.description}</p>
+                    <p className="text-muted text-xs mt-1.5 leading-relaxed line-clamp-3">{project.description}</p>
                   </div>
                   <div className="mt-4 pt-3 border-t border-hair">
                     <div className="flex flex-wrap gap-1.5 mb-3">
-                      {project.techStack?.split(',').map((tag) => (
-                        <span key={tag} className="px-2 py-0.5 rounded bg-teal-light text-teal text-[10px] font-mono">
-                          {tag.trim()}
+                      {(project.tags && project.tags.length > 0 ? project.tags : (project.techStack ? project.techStack.split(',') : [])).map((tag, i) => (
+                        <span key={i} className="px-2 py-0.5 rounded bg-teal-light text-teal text-[10px] font-mono">
+                          {String(tag).trim()}
                         </span>
                       ))}
                     </div>
-                    {project.link && (
+                    {(project.link || project.liveLink) && (
                       <a
-                        href={project.link}
+                        href={project.link || project.liveLink}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-teal hover:text-ink font-semibold transition-colors"
                       >
-                        View Project ↗
+                        Live Project ↗
                       </a>
                     )}
                   </div>
@@ -304,6 +332,142 @@ export default function Home() {
           </div>
         )}
       </section>
+
+      {/* Latest News & Press Releases Section */}
+      {news.length > 0 && (
+        <section className="bg-white border-t border-hair py-24 px-5">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-baseline justify-between mb-12">
+              <div>
+                <p className="font-mono text-xs tracking-[0.2em] uppercase text-teal mb-3">Press & Media</p>
+                <h2 className="font-display text-3xl md:text-4xl text-ink font-semibold">Latest News & Updates</h2>
+              </div>
+              <Link to="/news" className="font-mono text-xs uppercase tracking-wider text-teal hover:underline font-bold">
+                View all news →
+              </Link>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {news.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-paper border border-hair rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col group"
+                >
+                  <div
+                    className="h-48 w-full overflow-hidden bg-teal-light relative cursor-pointer"
+                    onClick={() => setSelectedNews(item)}
+                  >
+                    {getImageUrl(item.image) ? (
+                      <img
+                        src={getImageUrl(item.image)}
+                        alt={item.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center font-display text-teal text-base font-bold">
+                        CodeClub
+                      </div>
+                    )}
+                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur text-ink px-2.5 py-1 rounded-md text-[10px] font-mono font-medium shadow-xs">
+                      📅 {item.date || 'CodeClub'}
+                    </div>
+                  </div>
+
+                  <div className="p-6 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h3
+                        onClick={() => setSelectedNews(item)}
+                        className="font-display text-base font-bold text-ink group-hover:text-teal transition-colors duration-200 line-clamp-2 cursor-pointer mb-2"
+                      >
+                        {item.title}
+                      </h3>
+                      <p className="text-muted text-xs leading-relaxed line-clamp-3">
+                        {item.description}
+                      </p>
+                    </div>
+
+                    <div className="mt-5 pt-3 border-t border-hair/60 flex items-center justify-between">
+                      <button
+                        onClick={() => setSelectedNews(item)}
+                        className="text-xs font-mono font-bold text-teal group-hover:text-ink transition-colors uppercase tracking-wider inline-flex items-center gap-1"
+                      >
+                        Read Story <span>→</span>
+                      </button>
+                      <span className="text-[10px] font-mono text-muted/70">Press Release</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Full News Story Detail Modal */}
+      {selectedNews && (
+        <div className="fixed inset-0 bg-ink/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 md:p-6 overflow-y-auto animate-in fade-in duration-200">
+          <div
+            className="bg-paper border border-hair rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl relative my-auto flex flex-col max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 md:px-6 bg-white border-b border-hair flex items-center justify-between sticky top-0 z-10">
+              <div className="flex items-center gap-2 text-xs font-mono text-teal font-semibold">
+                <span>📰</span>
+                <span>CodeClub Official Story</span>
+              </div>
+              <button
+                onClick={() => setSelectedNews(null)}
+                className="w-8 h-8 rounded-full bg-paper hover:bg-hair/50 flex items-center justify-center text-ink text-sm font-bold transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6 md:p-8 overflow-y-auto space-y-6">
+              {getImageUrl(selectedNews.image) && (
+                <div className="w-full rounded-2xl overflow-hidden max-h-96 bg-teal-light border border-hair">
+                  <img
+                    src={getImageUrl(selectedNews.image)}
+                    alt={selectedNews.title}
+                    className="w-full h-full object-cover max-h-96"
+                  />
+                </div>
+              )}
+
+              <div className="flex items-center gap-3 text-xs font-mono text-muted border-b border-hair pb-4">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-light text-teal font-semibold">
+                  📅 {selectedNews.date || 'Official Announcement'}
+                </span>
+                <span>•</span>
+                <span>CodeClub Newsroom</span>
+              </div>
+
+              <h2 className="font-display text-2xl md:text-3xl font-bold text-ink leading-tight">
+                {selectedNews.title}
+              </h2>
+
+              <div className="text-ink/80 leading-relaxed space-y-4 whitespace-pre-line text-sm md:text-base">
+                {selectedNews.description}
+              </div>
+            </div>
+
+            <div className="p-4 md:px-8 bg-white border-t border-hair flex items-center justify-between">
+              <Link
+                to="/news"
+                className="text-xs font-mono text-teal hover:underline font-semibold"
+              >
+                View all news articles →
+              </Link>
+              <button
+                onClick={() => setSelectedNews(null)}
+                className="bg-ink text-paper text-xs font-semibold px-6 py-2.5 rounded-full hover:bg-teal transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* About strip */}
       <section className="bg-teal-light border-t border-hair py-20 px-5">

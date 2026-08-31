@@ -2,9 +2,11 @@ const mongoose = require('mongoose');
 
 const clientSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
-    logo: { type: String }, // path/URL to logo image
-    about: { type: String },
+    name: { type: String, required: true }, // Business Name / Title
+    logo: { type: String }, // path/URL to logo image of the service
+    service: { type: String }, // Service we provide / focus area
+    description: { type: String }, // Description
+    about: { type: String }, // Fallback / alias for description
     order: { type: Number, default: 0 }
   },
   {

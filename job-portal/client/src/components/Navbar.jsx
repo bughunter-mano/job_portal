@@ -21,6 +21,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-8 text-sm font-medium">
           <Link to="/" className={linkClass('/')}>Home</Link>
           <Link to="/jobs" className={linkClass('/jobs')}>Jobs</Link>
+          <Link to="/news" className={linkClass('/news')}>News</Link>
           <Link to="/verify" className={linkClass('/verify')}>Verify</Link>
           <Link to="/about" className={linkClass('/about')}>About</Link>
           <Link to="/contact" className={linkClass('/contact')}>Contact</Link>

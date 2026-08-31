@@ -1,0 +1,107 @@
+[
+  {
+    "title": "Peshawar Services Club",
+    "description": "Complete solution with product management, orders, insights, and a sleek admin panel—fast and scalable.",
+    "image": "psc-app.jpeg",
+    "tags": ["Full-Stack", "Mobile App", "CMS"],
+    "url": null
+  },
+  {
+    "title": "SavSplit",
+    "description": "Dual-mode app for personal and business use. Personal: split bills, track expenses. Business: manage inventory, record sales—like QuickBooks & Splitwise in one.",
+    "image": "app_project.png",
+    "tags": ["Mobile App", "Finance", "Full-Stack"],
+    "url": null
+  },
+  {
+    "title": "Haasil - Multi vendor E-commerce Platform",
+    "description": "A comprehensive e-commerce platform supporting multiple vendors with features like product management, order tracking, and analytics.",
+    "image": "web-hassil.jpg",
+    "tags": ["Full-Stack", "E-Commerce", "CMS"],
+    "url": "https://haasil.store/"
+  },
+  {
+    "title": "SEIZURE SENSE",
+    "description": "AN AI/ML-based system that analyzes brain signals (EEG DATA) to predict epileptic seizures in advance. It alerts the patient before an attack, allowing them to move to a safe environment and reduce the risk of injury.",
+    "image": "ai_project.png",
+    "tags": ["AI/ML", "Healthcare", "Python"],
+    "url": null
+  },
+  {
+    "title": "NovaSuite – AI SaaS Platform for Creative & Diagnostic Tools",
+    "description": "A powerful AI SaaS platform offering image generation, blog suggestions, background removal, resume review, and disease diagnostics—streamlining work through smart automation.",
+    "image": "web_project1.png",
+    "tags": ["AI/ML", "SaaS", "Web Development"],
+    "url": null
+  },
+  {
+    "title": "Custom LMS for an Education Platform",
+    "description": "Supports live classes, quizzes, certification, and user dashboards for students, instructors, and admins. Built for scale.",
+    "image": "web_project3.png",
+    "tags": ["Full-Stack", "Education", "LMS"],
+    "url": null
+  },
+  {
+    "title": "Essence — Scalable E-commerce Platform",
+    "description": "A modern e-commerce app with smart search, secure checkout, and mobile-first design for smooth shopping across devices.",
+    "image": "web_project4.png",
+    "tags": ["Web Development", "E-Commerce", "UI/UX"],
+    "url": null
+  },
+  {
+    "title": "Shopify — Full-featured E-commerce & Admin Panel",
+    "description": "Complete solution with product management, orders, insights, and a sleek admin panel—fast and scalable.",
+    "image": "web_project5.png",
+    "tags": ["Full-Stack", "E-Commerce", "Admin Panel"],
+    "url": null
+  },
+  {
+    "title": "Zmong Khyber Game Show",
+    "description": "Complete solution with product management, orders, insights, and a sleek admin panel—fast and scalable.",
+    "image": "web-project7.png",
+    "tags": ["Web Development", "Entertainment", "UI/UX"],
+    "url": null
+  },
+  {
+    "title": "Federal Youth Parliament",
+    "description": "Complete solution with product management, orders, insights, and a sleek admin panel—fast and scalable.",
+    "image": "App_project5.jpg",
+    "tags": ["Web Development", "Civic Tech", "Full-Stack"],
+    "url": null
+  },
+  {
+    "title": "VibeHive — Real-time Chat & Collaboration App",
+    "description": "Group chat, media sharing, presence indicators, and a clean UI. Built for seamless team and community communication.",
+    "image": "web_project6.png",
+    "tags": ["Full-Stack", "Real-Time", "Chat"],
+    "url": null
+  },
+  {
+    "title": "Inventory Management System for a Multi location Retail Chain",
+    "description": "Tracks real-time stock, reduces overstocking, and streamlines supply operations. Includes barcode integration, role-based access, and reporting.",
+    "image": "web_project2.png",
+    "tags": ["Full-Stack", "Retail", "ERP"],
+    "url": null
+  },
+  {
+    "title": "Halatick — Restaurant Ordering & Management App",
+    "description": "Order dine-in, takeaway, or delivery. Includes digital menus, live order tracking, and table reservations.",
+    "image": "app_project2.png",
+    "tags": ["Mobile App", "Food & Beverage", "Full-Stack"],
+    "url": null
+  },
+  {
+    "title": "Khyber Pakhtunkhwa — Tourism Discovery App",
+    "description": "Guides, maps, offline support, and trip planning to explore KP's historical, cultural, and natural treasures.",
+    "image": "app_project3.png",
+    "tags": ["Mobile App", "Tourism", "UI/UX"],
+    "url": null
+  },
+  {
+    "title": "Smart Dual Finance",
+    "description": "Same as above, presented for another use case. Finance management across personal and business settings.",
+    "image": "cyber_project1.png",
+    "tags": ["Full-Stack", "Finance", "CyberSecurity"],
+    "url": null
+  }
+]

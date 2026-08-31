@@ -37,6 +37,7 @@ export default function Footer() {
             <h4 className="font-mono text-xs tracking-wider uppercase text-ink mb-4">Company</h4>
             <ul className="space-y-2 text-sm">
               <li><Link to="/about" className="hover:text-teal transition-colors">About Us</Link></li>
+              <li><Link to="/news" className="hover:text-teal transition-colors">News & Media</Link></li>
               <li><Link to="/jobs" className="hover:text-teal transition-colors">Careers / Jobs</Link></li>
               <li><Link to="/verify" className="hover:text-teal transition-colors">Certificate Registry</Link></li>
               <li><Link to="/contact" className="hover:text-teal transition-colors">Contact Support</Link></li>

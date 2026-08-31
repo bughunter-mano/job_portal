@@ -7,6 +7,9 @@ const Project = require('./models/Project');
 const Team = require('./models/Team');
 const Testimonial = require('./models/Testimonial');
 const Job = require('./models/Job');
+const News = require('./models/News');
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 async function seedAdminAuto() {
@@ -29,90 +32,145 @@ async function seedContent() {
   try {
     // 1. Clients
     const clientCount = await Client.countDocuments();
-    if (clientCount === 0) {
-      const clientsData = [
-        {
-          name: 'ApexCorp',
-          logo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=150&q=80',
-          about: 'ApexCorp is a global leader in high-performance cloud migration services and DevOps enablement.',
-          order: 1
-        },
-        {
-          name: 'Vertex Systems',
-          logo: 'https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?auto=format&fit=crop&w=150&q=80',
-          about: 'Vertex Systems builds decentralized database solutions and scalable microservices architectures.',
-          order: 2
-        },
-        {
-          name: 'NovaSoft',
-          logo: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=150&q=80',
-          about: 'NovaSoft provides end-to-end enterprise CRM customized solutions and intelligence dashboards.',
-          order: 3
-        },
-        {
-          name: 'Stellar Tech',
-          logo: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&w=150&q=80',
-          about: 'Stellar Tech develops next-generation AI agents and semantic search integrations for enterprise.',
-          order: 4
-        },
-        {
-          name: 'Summit Consulting',
-          logo: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=150&q=80',
-          about: 'Summit Consulting advises top Fortune 500 tech companies on digital transformation strategies.',
-          order: 5
+    if (clientCount < 27) {
+      if (clientCount > 0) {
+        await Client.deleteMany({});
+      }
+      let clientsData = [];
+      const clientsJsonPath = path.join(__dirname, '..', 'data', 'clientsData.json');
+
+      const logoMap = {
+        "Peshawar Service Club": "brand1.png",
+        "Peshawar Services Club": "brand1.png",
+        "Memaar Pvt Ltd.": "brand2.png",
+        "IMSciences": "brand3.png",
+        "Abbottabad Club": "AbbattabadClub.png",
+        "Haasil Pvt Ltd.": "brand4.jpeg",
+        "H-MAK Pvt Ltd.": "brand5.jpeg",
+        "NIC Peshawar": "NIC Peshawar.jpeg",
+        "Concordia Colleges": "Concordia Colleges.jpeg",
+        "Quality Coaching Academy": "Quality Coaching Academy.jpeg",
+        "Edwardian Coaching Academy": "sca.jpg",
+        "Genius Coaching Academy": "brand7.jpg",
+        "FCA": "brand8.png",
+        "GEO Wash": "GEOWash.jpeg",
+        "LEO Learning": "LEOLearning.jpeg",
+        "Naqaa-Ksa": "brand9.jpg",
+        "GLEAM UK Premium Car Wash": "GLEAMUkPremiumCarWash.png",
+        "Feather Start Car Wash": "FeatherStartCarWash.jpeg",
+        "Skill Connect": "skill.jpg",
+        "Sayaratak": "Sayaratak.jpeg",
+        "Paragon Overseas Education Pvt Ltd.": "brand10.jpg",
+        "Lavita Developers": "lavita.jpg",
+        "Zamong Khyber Pvt Ltd.": "brand11.jpeg",
+        "Edge Cutting Group": "edge.jpg",
+        "Rehmat Tax Pvt Ltd.": "win.jpg",
+        "Shamroz Group of Companies Pvt Ltd.": "x.jpg",
+        "Muftah Chemicals Pvt Ltd.": "Muftah Chemicals PVT LTD.jpeg",
+        "New Al-Kareem Hostel": "New Al-Kareem Hostal.jpeg"
+      };
+
+      if (fs.existsSync(clientsJsonPath)) {
+        try {
+          const rawClients = JSON.parse(fs.readFileSync(clientsJsonPath, 'utf8'));
+          clientsData = rawClients.map((item, idx) => {
+            const logoFile = logoMap[item.name] || logoMap[item.brandName] || 'brand1.png';
+            return {
+              name: item.brandName || item.name,
+              service: item.focus || 'Custom Software Solution',
+              description: item.description || '',
+              about: item.description || '',
+              logo: `/assets/clients/${logoFile}`,
+              order: idx + 1
+            };
+          });
+        } catch (err) {
+          console.error('Error reading clientsData.json:', err.message);
         }
-      ];
+      }
+
+      if (!clientsData.length) {
+        clientsData = [
+          {
+            name: 'Peshawar Services Club',
+            service: 'App & Management System',
+            description: 'We built an app and management system that brings member services, internal coordination, and daily reporting into one place.',
+            logo: '/assets/clients/brand1.png',
+            order: 1
+          },
+          {
+            name: 'Memaar Pvt Ltd.',
+            service: 'WhatsApp automation & leads',
+            description: 'We set up WhatsApp automation and a lead flow that responds quickly, captures interest, and keeps follow-ups organized.',
+            logo: '/assets/clients/brand2.png',
+            order: 2
+          },
+          {
+            name: 'IMSciences',
+            service: 'Recruiter Portal',
+            description: 'We created a recruiter portal that gives hiring teams a cleaner way to publish openings and review applications.',
+            logo: '/assets/clients/brand3.png',
+            order: 3
+          }
+        ];
+      }
       await Client.insertMany(clientsData);
-      console.log('✅ 5 Clients seeded successfully!');
+      console.log(`✅ ${clientsData.length} Clients seeded successfully!`);
     }
 
-    // 2. Projects
+    // 2. Projects / Case Studies
     const projectCount = await Project.countDocuments();
-    if (projectCount === 0) {
-      const projectsData = [
-        {
-          title: 'Enterprise Analytics Dashboard',
-          description: 'A real-time data monitoring system visualizing system load, financial transactions, and user engagement metrics using D3.js and WebSockets.',
-          image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=500&q=80',
-          techStack: 'React, Node.js, Express, Chart.js, Tailwind',
-          link: 'https://github.com',
-          order: 1
-        },
-        {
-          title: 'Decentralized Data Broker',
-          description: 'A high-throughput distributed system designed to securely broker IoT telemetry across private clouds with automated cryptographic verification.',
-          image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=500&q=80',
-          techStack: 'Golang, gRPC, Kafka, Redis, Docker',
-          link: 'https://github.com',
-          order: 2
-        },
-        {
-          title: 'Interactive Web UI Toolkit',
-          description: 'A component library designed for rapid web app development focusing on clean aesthetic, strict accessibility (WCAG AA), and premium micro-interactions.',
-          image: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=500&q=80',
-          techStack: 'TypeScript, React, Storybook, PostCSS',
-          link: 'https://github.com',
-          order: 3
-        },
-        {
-          title: 'SaaS Mobile Companion App',
-          description: 'Cross-platform mobile application allowing real-time project collaboration, workspace messaging, and push-notified task assignments.',
-          image: 'https://images.unsplash.com/photo-1522542550221-31fd19575a2d?auto=format&fit=crop&w=500&q=80',
-          techStack: 'React Native, Redux, Node.js, Socket.io',
-          link: 'https://github.com',
-          order: 4
-        },
-        {
-          title: 'E-commerce AI Search Platform',
-          description: 'An AI-powered product recommendation and semantic search engine handling millions of queries per second with sub-10ms response latency.',
-          image: 'https://images.unsplash.com/photo-1557200134-90327ee9fafa?auto=format&fit=crop&w=500&q=80',
-          techStack: 'Python, PyTorch, FastAPI, Elasticsearch',
-          link: 'https://github.com',
-          order: 5
+    if (projectCount < 15) {
+      if (projectCount > 0) {
+        await Project.deleteMany({});
+      }
+      let projectsData = [];
+      const caseStudiesJsonPath = path.join(__dirname, '..', 'data', 'caseStudiesData.json');
+      if (fs.existsSync(caseStudiesJsonPath)) {
+        try {
+          const rawCases = JSON.parse(fs.readFileSync(caseStudiesJsonPath, 'utf8'));
+          projectsData = rawCases.map((item, idx) => ({
+            title: item.title,
+            projectType: item.tags && item.tags.length > 0 ? item.tags[0] : 'Software Engineering',
+            description: item.description || '',
+            image: item.image ? (item.image.startsWith('http') || item.image.startsWith('/') ? item.image : `/assets/casestudy/${item.image}`) : '',
+            tags: item.tags || [],
+            techStack: (item.tags || []).join(', '),
+            link: item.url || '',
+            liveLink: item.url || '',
+            order: idx + 1
+          }));
+        } catch (err) {
+          console.error('Error reading caseStudiesData.json:', err.message);
         }
-      ];
+      }
+
+      if (!projectsData.length) {
+        projectsData = [
+          {
+            title: 'Peshawar Services Club',
+            projectType: 'Mobile App',
+            description: 'Complete solution with product management, orders, insights, and a sleek admin panel—fast and scalable.',
+            image: '/uploads/images/psc-app.jpeg',
+            tags: ['Full-Stack', 'Mobile App', 'CMS'],
+            techStack: 'Full-Stack, Mobile App, CMS',
+            link: '',
+            order: 1
+          },
+          {
+            title: 'Haasil - Multi vendor E-commerce Platform',
+            projectType: 'E-Commerce',
+            description: 'A comprehensive e-commerce platform supporting multiple vendors with product management, order tracking, and analytics.',
+            image: '/uploads/images/web-hassil.jpg',
+            tags: ['Full-Stack', 'E-Commerce', 'CMS'],
+            techStack: 'Full-Stack, E-Commerce, CMS',
+            link: 'https://haasil.store/',
+            order: 2
+          }
+        ];
+      }
       await Project.insertMany(projectsData);
-      console.log('✅ 5 Projects seeded successfully!');
+      console.log(`✅ ${projectsData.length} Projects / Case Studies seeded successfully!`);
     }
 
     // 3. Team
@@ -280,6 +338,78 @@ async function seedContent() {
       ];
       await Job.insertMany(jobsData);
       console.log('✅ 5 Jobs seeded successfully!');
+    }
+
+    // 6. News
+    const newsCount = await News.countDocuments();
+    if (newsCount === 0) {
+      let newsItems = [];
+      const jsonPath = path.join(__dirname, '..', 'data', 'newsData.json');
+      if (fs.existsSync(jsonPath)) {
+        try {
+          const rawData = fs.readFileSync(jsonPath, 'utf8');
+          const parsed = JSON.parse(rawData);
+          newsItems = parsed.map((item, idx) => ({
+            title: item.title,
+            description: item.summary || item.description,
+            image: item.image ? (item.image.startsWith('http') || item.image.startsWith('/') ? item.image : `/uploads/images/${item.image}`) : '',
+            date: item.date || 'October 2025',
+            order: idx + 1
+          }));
+        } catch (readErr) {
+          console.error('Error reading newsData.json:', readErr.message);
+        }
+      }
+
+      if (!newsItems.length) {
+        newsItems = [
+          {
+            title: 'Code Club and Peshawar Services Club Partnership',
+            description: 'Code Club and Peshawar Services Club have officially signed a partnership agreement aimed at strengthening collaboration between innovation and leadership. The agreement was formalized by Major Suhail Afzal, Secretary of Peshawar Services Club, along with Mr. Abdullah Qureshi, CEO of Code Club, and Mr. Muhammad Affan, CTO of Code Club. This partnership marks a significant step toward promoting technology-driven initiatives and fostering opportunities for young innovators in the region.',
+            image: '/uploads/images/news5.jpeg',
+            date: 'October 16, 2025',
+            order: 1
+          },
+          {
+            title: 'Innovation Session at Lincoln Corners Pakistan',
+            description: 'Mr. Abdullah Qureshi and Mr. Muhammad Affan, students of BCS 7th Semester and founding team members of Code Club, proudly represented their startup at the Pakistan One event organized by the Ministry of Planning, Development and Special Initiatives. Their participation highlighted the spirit of youth-led innovation and the potential of Code Club to contribute to Pakistan\'s tech future.',
+            image: '/uploads/images/news6.jpeg',
+            date: 'October 1, 2025',
+            order: 2
+          },
+          {
+            title: 'CodeClub Founders Represent at Pakistan One',
+            description: 'Mr. Abdullah Qureshi and Mr. Muhammad Affan, students of BCS 7th Semester and founding team members of Code Club, proudly represented their startup at the Pakistan One event organized by the Ministry of Planning, Development and Special Initiatives. Their participation highlighted the spirit of youth-led innovation and the potential of Code Club to contribute to Pakistan\'s tech future.',
+            image: '/uploads/images/news2.jpg',
+            date: 'August 25, 2025',
+            order: 3
+          },
+          {
+            title: 'CodeClub Inauguration Ceremony',
+            description: 'Students of IM Sciences Peshawar have launched Code Club, a self-help software house to promote technology, modern trends, and income opportunities. Founded by Abdullah Hasnain Qureshi, it aims to bridge the gap between theory and practical skills. The inauguration was graced by Amjad Aziz Malik and Muhammad Habib Qureshi, who praised the students\' dedication. Around 30 students have joined in the first phase to work on real-world projects. Code Club will serve as a launchpad for talent, innovation, and professional growth.',
+            image: '/uploads/images/news1.jpeg',
+            date: 'July 21, 2025',
+            order: 4
+          },
+          {
+            title: 'CodeClub Inauguration Ceremony (Session 2)',
+            description: 'Students of IM Sciences Peshawar have launched Code Club, a self-help software house to promote technology, modern trends, and income opportunities. Founded by Abdullah Hasnain Qureshi, it aims to bridge the gap between theory and practical skills. The inauguration was graced by Amjad Aziz Malik and Muhammad Habib Qureshi, who praised the students\' dedication. Around 30 students have joined in the first phase to work on real-world projects. Code Club will serve as a launchpad for talent, innovation, and professional growth.',
+            image: '/uploads/images/new3.jpeg',
+            date: 'July 21, 2025',
+            order: 5
+          },
+          {
+            title: 'CodeClub Inauguration Ceremony (Press Coverage)',
+            description: 'Students of IM Sciences Peshawar have launched Code Club, a self-help software house to promote technology, modern trends, and income opportunities. Founded by Abdullah Hasnain Qureshi, it aims to bridge the gap between theory and practical skills. The inauguration was graced by Amjad Aziz Malik and Muhammad Habib Qureshi, who praised the students\' dedication. Around 30 students have joined in the first phase to work on real-world projects. Code Club will serve as a launchpad for talent, innovation, and professional growth.',
+            image: '/uploads/images/news4.jpeg',
+            date: 'July 21, 2025',
+            order: 6
+          }
+        ];
+      }
+
+      await News.insertMany(newsItems);
+      console.log(`✅ ${newsItems.length} News articles seeded successfully!`);
     }
   } catch (err) {
     console.error('Content seeding error:', err.message);

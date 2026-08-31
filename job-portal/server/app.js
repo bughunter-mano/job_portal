@@ -12,6 +12,8 @@ const projectRoutes = require('./routes/projectRoutes');
 const testimonialRoutes = require('./routes/testimonialRoutes');
 const imageUploadRoutes = require('./routes/imageUploadRoutes');
 const certificateRoutes = require('./routes/certificateRoutes');
+const newsRoutes = require('./routes/newsRoutes');
+const messageRoutes = require('./routes/messageRoutes');
 
 const app = express();
 
@@ -30,8 +32,12 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/api/casestudies', projectRoutes);
 app.use('/api/testimonials', testimonialRoutes);
 app.use('/api/certificates', certificateRoutes);
+app.use('/api/news', newsRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/contact', messageRoutes);
 
 // Fallback routes (without /api prefix) to prevent 404 Route Not Found
 app.use('/admin', adminRoutes);
@@ -41,8 +47,12 @@ app.use('/applications', applicationRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/clients', clientRoutes);
 app.use('/projects', projectRoutes);
+app.use('/casestudies', projectRoutes);
 app.use('/testimonials', testimonialRoutes);
 app.use('/certificates', certificateRoutes);
+app.use('/news', newsRoutes);
+app.use('/messages', messageRoutes);
+app.use('/contact', messageRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Job Portal API is running' });

@@ -16,7 +16,8 @@ export default function Dashboard() {
         { label: 'Total Applications', value: stats.totalApplications, color: 'bg-blue-50 text-blue-700' },
         { label: 'Pending', value: stats.pending, color: 'bg-yellow-50 text-yellow-700' },
         { label: 'Accepted', value: stats.accepted, color: 'bg-emerald-50 text-emerald-700' },
-        { label: 'Rejected', value: stats.rejected, color: 'bg-red-50 text-red-700' }
+        { label: 'Rejected', value: stats.rejected, color: 'bg-red-50 text-red-700' },
+        { label: 'News & Announcements', value: stats.totalNews || 0, color: 'bg-purple-50 text-purple-700' }
       ]
     : [];
 
