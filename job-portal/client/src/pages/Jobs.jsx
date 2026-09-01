@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import JobCard from '../components/JobCard.jsx';
+import { initialJobs } from '../data/initialData';
 
 export default function Jobs() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [jobs, setJobs] = useState(initialJobs);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [location, setLocation] = useState('');
   const [jobType, setJobType] = useState('');
@@ -14,12 +15,16 @@ export default function Jobs() {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    setLoading(true);
     api
       .get('/jobs', { params: { search, location, job_type: jobType, page, limit: 9 } })
       .then((res) => {
-        setJobs(res.data.jobs);
-        setTotalPages(res.data.pagination.totalPages || 1);
+        if (res.data?.jobs && res.data.jobs.length > 0) {
+          setJobs(res.data.jobs);
+          setTotalPages(res.data.pagination?.totalPages || 1);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load jobs from API, using fallback:', err);
       })
       .finally(() => setLoading(false));
   }, [search, location, jobType, page]);

@@ -2,14 +2,21 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import JobCard from '../components/JobCard.jsx';
+import {
+  initialClients,
+  initialProjects,
+  initialNews,
+  initialTestimonials,
+  initialJobs
+} from '../data/initialData';
 
 export default function Home() {
-  const [latestJobs, setLatestJobs] = useState([]);
+  const [latestJobs, setLatestJobs] = useState(initialJobs);
   const [search, setSearch] = useState('');
-  const [clients, setClients] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const [testimonials, setTestimonials] = useState([]);
-  const [news, setNews] = useState([]);
+  const [clients, setClients] = useState(initialClients);
+  const [projects, setProjects] = useState(initialProjects);
+  const [testimonials, setTestimonials] = useState(initialTestimonials);
+  const [news, setNews] = useState(initialNews);
   const [selectedNews, setSelectedNews] = useState(null);
   const [selectedClient, setSelectedClient] = useState(null);
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
@@ -80,29 +87,49 @@ export default function Home() {
   const getImageUrl = getNewsImageUrl;
 
   useEffect(() => {
-    // Load latest jobs
+    // Load latest jobs from API if available
     api.get('/jobs?limit=6')
-      .then((res) => setLatestJobs(res.data.jobs || []))
+      .then((res) => {
+        if (res.data?.jobs && res.data.jobs.length > 0) {
+          setLatestJobs(res.data.jobs);
+        }
+      })
       .catch(() => {});
 
-    // Load clients
+    // Load clients from API if available
     api.get('/clients')
-      .then((res) => setClients(res.data.clients || []))
+      .then((res) => {
+        if (res.data?.clients && res.data.clients.length > 0) {
+          setClients(res.data.clients);
+        }
+      })
       .catch(() => {});
 
-    // Load projects
+    // Load projects from API if available
     api.get('/projects')
-      .then((res) => setProjects(res.data.projects || []))
+      .then((res) => {
+        if (res.data?.projects && res.data.projects.length > 0) {
+          setProjects(res.data.projects);
+        }
+      })
       .catch(() => {});
 
-    // Load testimonials
+    // Load testimonials from API if available
     api.get('/testimonials')
-      .then((res) => setTestimonials(res.data.testimonials || []))
+      .then((res) => {
+        if (res.data?.testimonials && res.data.testimonials.length > 0) {
+          setTestimonials(res.data.testimonials);
+        }
+      })
       .catch(() => {});
 
-    // Load latest news
+    // Load latest news from API if available
     api.get('/news?limit=3')
-      .then((res) => setNews(res.data.news || []))
+      .then((res) => {
+        if (res.data?.news && res.data.news.length > 0) {
+          setNews(res.data.news);
+        }
+      })
       .catch(() => {});
   }, []);
 

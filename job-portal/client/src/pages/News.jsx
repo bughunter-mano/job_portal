@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import { initialNews } from '../data/initialData';
 
 export default function News() {
-  const [newsList, setNewsList] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [newsList, setNewsList] = useState(initialNews);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedNews, setSelectedNews] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -16,13 +17,14 @@ export default function News() {
   }, []);
 
   function fetchNews() {
-    setLoading(true);
     api.get('/news')
       .then((res) => {
-        setNewsList(res.data.news || []);
+        if (res.data?.news && res.data.news.length > 0) {
+          setNewsList(res.data.news);
+        }
       })
       .catch((err) => {
-        console.error('Failed to load news:', err);
+        console.error('Failed to load news from API, using fallback:', err);
       })
       .finally(() => {
         setLoading(false);
