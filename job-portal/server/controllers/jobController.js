@@ -52,6 +52,42 @@ async function getJobById(req, res) {
   }
 }
 
+// Apply for a job (public route)
+async function applyForJob(req, res) {
+  try {
+    const { jobId } = req.params;
+    const { name, email, phone, cover_letter, resume } = req.body;
+
+    if (!jobId || !name || !email || !phone) {
+      return res.status(400).json({ success: false, message: 'All fields are required' });
+    }
+
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ success: false, message: 'Job not found' });
+    }
+
+    // Create application
+    const application = {
+      name,
+      email,
+      phone,
+      cover_letter,
+      resume,
+      job_title: job.title
+    };
+
+    // Add application to job's applications array
+    job.applications.push(application);
+    await job.save();
+
+    res.json({ success: true, message: 'Application submitted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error applying for job' });
+  }
+}
+
 // POST /api/jobs  (admin only)
 async function createJob(req, res) {
   try {

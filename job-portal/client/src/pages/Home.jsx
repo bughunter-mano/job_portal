@@ -17,19 +17,67 @@ export default function Home() {
   const navigate = useNavigate();
   const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
-  const getImageUrl = (imgPath) => {
+  const getClientLogoUrl = (logoPath) => {
+    if (!logoPath) return null;
+    if (logoPath.startsWith('http://') || logoPath.startsWith('https://') || logoPath.startsWith('data:')) {
+      return logoPath;
+    }
+    if (logoPath.startsWith('/assets/')) {
+      return logoPath;
+    }
+    if (logoPath.startsWith('assets/')) {
+      return `/${logoPath}`;
+    }
+    if (logoPath.startsWith('/uploads/')) {
+      return `${BASE_URL}${logoPath}`;
+    }
+    if (logoPath.startsWith('uploads/')) {
+      return `${BASE_URL}/${logoPath}`;
+    }
+    return `/assets/clients/${logoPath}`;
+  };
+
+  const getProjectImageUrl = (imgPath) => {
     if (!imgPath) return null;
-    if (imgPath.startsWith('http://') || imgPath.startsWith('https://')) {
+    if (imgPath.startsWith('http://') || imgPath.startsWith('https://') || imgPath.startsWith('data:')) {
       return imgPath;
     }
     if (imgPath.startsWith('/assets/')) {
       return imgPath;
     }
+    if (imgPath.startsWith('assets/')) {
+      return `/${imgPath}`;
+    }
     if (imgPath.startsWith('/uploads/')) {
       return `${BASE_URL}${imgPath}`;
     }
+    if (imgPath.startsWith('uploads/')) {
+      return `${BASE_URL}/${imgPath}`;
+    }
+    return `/assets/casestudy/${imgPath}`;
+  };
+
+  const getNewsImageUrl = (imgPath) => {
+    if (!imgPath) return null;
+    if (imgPath.startsWith('http://') || imgPath.startsWith('https://') || imgPath.startsWith('data:')) {
+      return imgPath;
+    }
+    if (imgPath.startsWith('/assets/')) {
+      return imgPath;
+    }
+    if (imgPath.startsWith('assets/')) {
+      return `/${imgPath}`;
+    }
+    if (imgPath.startsWith('/uploads/')) {
+      return `${BASE_URL}${imgPath}`;
+    }
+    if (imgPath.startsWith('uploads/')) {
+      return `${BASE_URL}/${imgPath}`;
+    }
     return `/assets/news/${imgPath}`;
   };
+
+  const getImageUrl = getNewsImageUrl;
 
   useEffect(() => {
     // Load latest jobs
@@ -98,25 +146,39 @@ export default function Home() {
               Trusted by leading clients & partners
             </h2>
             <div className="flex flex-wrap items-center justify-center gap-12 md:gap-16">
-              {clients.map((client) => (
-                <div
-                  key={client.id}
-                  onClick={() => setSelectedClient(client)}
-                  className="group cursor-pointer flex flex-col items-center transition-transform hover:scale-105 duration-300"
-                >
-                  {client.logo ? (
-                    <img
-                      src={client.logo.startsWith('http') ? client.logo : `${BASE_URL}${client.logo}`}
-                      alt={client.name}
-                      className="h-12 max-w-[150px] object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300"
-                    />
-                  ) : (
-                    <span className="font-display text-lg font-bold text-muted group-hover:text-teal transition-colors">
-                      {client.name}
-                    </span>
-                  )}
-                </div>
-              ))}
+              {clients.map((client) => {
+                const logoUrl = getClientLogoUrl(client.logo);
+                return (
+                  <div
+                    key={client.id}
+                    onClick={() => setSelectedClient(client)}
+                    className="group cursor-pointer flex flex-col items-center transition-transform hover:scale-105 duration-300"
+                  >
+                    {logoUrl ? (
+                      <>
+                        <img
+                          src={logoUrl}
+                          alt={client.name}
+                          className="h-12 max-w-[150px] object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            if (e.target.nextElementSibling) {
+                              e.target.nextElementSibling.style.display = 'block';
+                            }
+                          }}
+                        />
+                        <span className="font-display text-base font-bold text-muted group-hover:text-teal transition-colors hidden">
+                          {client.name}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="font-display text-base font-bold text-muted group-hover:text-teal transition-colors">
+                        {client.name}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -133,11 +195,14 @@ export default function Home() {
               ✕
             </button>
             <div className="flex items-center gap-4 mb-4">
-              {selectedClient.logo ? (
+              {getClientLogoUrl(selectedClient.logo) ? (
                 <img
-                  src={selectedClient.logo.startsWith('http') ? selectedClient.logo : `${BASE_URL}${selectedClient.logo}`}
+                  src={getClientLogoUrl(selectedClient.logo)}
                   alt={selectedClient.name}
                   className="h-12 w-24 object-contain bg-white p-1 border rounded"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
                 />
               ) : (
                 <span className="font-display text-xl font-bold text-teal">{selectedClient.name}</span>
@@ -164,58 +229,64 @@ export default function Home() {
             </div>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {projects.map((project) => (
-              <div
-                key={project.id}
-                className="bg-white border border-hair rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group"
-              >
-                {project.image ? (
-                  <div className="h-44 w-full overflow-hidden bg-teal-light/50 relative">
-                    <img
-                      src={project.image.startsWith('http') ? project.image : `${BASE_URL}${project.image}`}
-                      alt={project.title}
-                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    {project.projectType && (
-                      <span className="absolute top-2.5 right-2.5 bg-ink/80 backdrop-blur text-paper text-[10px] font-mono px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                        {project.projectType}
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <div className="h-44 w-full bg-teal-light flex items-center justify-center font-display text-teal text-base font-bold">
-                    {project.title}
-                  </div>
-                )}
-                <div className="p-5 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className="font-display text-base text-ink font-semibold group-hover:text-teal transition-colors duration-300">
-                      {project.title}
-                    </h3>
-                    <p className="text-muted text-xs mt-1.5 leading-relaxed line-clamp-3">{project.description}</p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-hair">
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                      {(project.tags && project.tags.length > 0 ? project.tags : (project.techStack ? project.techStack.split(',') : [])).map((tag, i) => (
-                        <span key={i} className="px-2 py-0.5 rounded bg-teal-light text-teal text-[10px] font-mono">
-                          {String(tag).trim()}
+            {projects.map((project) => {
+              const projectImg = getProjectImageUrl(project.image);
+              return (
+                <div
+                  key={project.id}
+                  className="bg-white border border-hair rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group"
+                >
+                  {projectImg ? (
+                    <div className="h-44 w-full overflow-hidden bg-teal-light/50 relative">
+                      <img
+                        src={projectImg}
+                        alt={project.title}
+                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                      {project.projectType && (
+                        <span className="absolute top-2.5 right-2.5 bg-ink/80 backdrop-blur text-paper text-[10px] font-mono px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                          {project.projectType}
                         </span>
-                      ))}
+                      )}
                     </div>
-                    {(project.link || project.liveLink) && (
-                      <a
-                        href={project.link || project.liveLink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-teal hover:text-ink font-semibold transition-colors"
-                      >
-                        Live Project ↗
-                      </a>
-                    )}
+                  ) : (
+                    <div className="h-44 w-full bg-teal-light flex items-center justify-center font-display text-teal text-base font-bold">
+                      {project.title}
+                    </div>
+                  )}
+                  <div className="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h3 className="font-display text-base text-ink font-semibold group-hover:text-teal transition-colors duration-300">
+                        {project.title}
+                      </h3>
+                      <p className="text-muted text-xs mt-1.5 leading-relaxed line-clamp-3">{project.description}</p>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-hair">
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {(project.tags && project.tags.length > 0 ? project.tags : (project.techStack ? project.techStack.split(',') : [])).map((tag, i) => (
+                          <span key={i} className="px-2 py-0.5 rounded bg-teal-light text-teal text-[10px] font-mono">
+                            {String(tag).trim()}
+                          </span>
+                        ))}
+                      </div>
+                      {(project.link || project.liveLink) && (
+                        <a
+                          href={project.link || project.liveLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-teal hover:text-ink font-semibold transition-colors"
+                        >
+                          Live Project ↗
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}

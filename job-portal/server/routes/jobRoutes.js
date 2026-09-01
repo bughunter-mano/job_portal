@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
-  getAllJobs, getJobById, createJob, updateJob, deleteJob, getAllJobsAdmin
+  getAllJobs, getJobById, createJob, updateJob, deleteJob, getAllJobsAdmin, applyForJob
 } = require('../controllers/jobController');
 const { verifyAdmin } = require('../middleware/authMiddleware');
 
@@ -9,6 +9,7 @@ const { verifyAdmin } = require('../middleware/authMiddleware');
 router.get('/', getAllJobs);
 router.get('/admin/all', verifyAdmin, getAllJobsAdmin); // must be BEFORE /:id
 router.get('/:id', getJobById);
+router.post('/:id/apply', applyForJob);
 
 // Admin-only routes
 router.post('/', verifyAdmin, createJob);

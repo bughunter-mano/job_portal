@@ -21,8 +21,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded resumes statically
+// Serve uploaded files and static assets
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/assets', express.static(path.join(__dirname, '..', 'client', 'public', 'assets')));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // API routes (with /api prefix)
 app.use('/api/admin', adminRoutes);
