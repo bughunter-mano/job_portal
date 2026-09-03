@@ -163,4 +163,4 @@ async function getAllJobsAdmin(req, res) {
   }
 }
 
-module.exports = { getAllJobs, getJobById, createJob, updateJob, deleteJob, getAllJobsAdmin };
+module.exports = { getAllJobs, getJobById, createJob, updateJob, deleteJob, getAllJobsAdmin, applyForJob };

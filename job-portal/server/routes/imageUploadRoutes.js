@@ -5,6 +5,23 @@ const { verifyAdmin } = require('../middleware/authMiddleware');
 const { isCloudinaryConfigured, uploadImage: uploadToCloudinary } = require('../config/cloudinary');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
+
+function getSafeUploadDir(subfolder) {
+  let uploadDir = path.join(__dirname, '..', 'uploads', subfolder);
+  try {
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    return uploadDir;
+  } catch (err) {
+    uploadDir = path.join(os.tmpdir(), 'uploads', subfolder);
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    return uploadDir;
+  }
+}
 
 router.post('/upload-image', verifyAdmin, uploadImage.single('image'), async (req, res) => {
   try {
@@ -20,20 +37,14 @@ router.post('/upload-image', verifyAdmin, uploadImage.single('image'), async (re
         imageUrl = uploadResult.secure_url || uploadResult.url;
       } catch (cloudErr) {
         console.error('Cloudinary image upload error, falling back to local storage:', cloudErr.message);
-        const uploadDir = path.join(__dirname, '..', 'uploads', 'images');
-        if (!fs.existsSync(uploadDir)) {
-          fs.mkdirSync(uploadDir, { recursive: true });
-        }
+        const uploadDir = getSafeUploadDir('images');
         const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
         const filename = `img-${unique}${path.extname(req.file.originalname || '.jpg')}`;
         fs.writeFileSync(path.join(uploadDir, filename), req.file.buffer);
         imageUrl = `/uploads/images/${filename}`;
       }
     } else {
-      const uploadDir = path.join(__dirname, '..', 'uploads', 'images');
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
+      const uploadDir = getSafeUploadDir('images');
       const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
       const filename = `img-${unique}${path.extname(req.file.originalname || '.jpg')}`;
       fs.writeFileSync(path.join(uploadDir, filename), req.file.buffer);

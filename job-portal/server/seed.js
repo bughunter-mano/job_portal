@@ -1,4 +1,5 @@
 // Run once to create the first admin account and dummy content: npm run seed
+const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const connectDB = require('./config/db');
 const Admin = require('./models/Admin');
@@ -14,6 +15,9 @@ require('dotenv').config();
 
 async function seedAdminAuto() {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return;
+    }
     const email = 'admin@jobportal.com';
     const existing = await Admin.findOne({ email });
     if (!existing) {
@@ -30,6 +34,9 @@ async function seedAdminAuto() {
 
 async function seedContent() {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return;
+    }
     // 1. Clients
     const clientCount = await Client.countDocuments();
     if (clientCount < 27) {

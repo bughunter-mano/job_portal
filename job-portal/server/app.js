@@ -57,7 +57,15 @@ app.use('/messages', messageRoutes);
 app.use('/contact', messageRoutes);
 
 app.get('/', (req, res) => {
-  res.json({ message: 'Job Portal API is running' });
+  const mongoose = require('mongoose');
+  const isConnected = mongoose.connection.readyState === 1;
+  res.json({
+    success: true,
+    message: 'Job Portal API is running',
+    database: isConnected ? 'Connected' : 'Disconnected',
+    status: isConnected ? 'healthy' : 'degraded',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // 404 handler

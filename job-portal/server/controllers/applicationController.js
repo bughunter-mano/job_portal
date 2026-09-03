@@ -6,6 +6,23 @@ const { sendApplicationStatusEmail } = require('../utils/emailService');
 const { isCloudinaryConfigured, uploadResume } = require('../config/cloudinary');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
+
+function getSafeUploadDir(subfolder) {
+  let uploadDir = path.join(__dirname, '..', 'uploads', subfolder);
+  try {
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    return uploadDir;
+  } catch (err) {
+    uploadDir = path.join(os.tmpdir(), 'uploads', subfolder);
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    return uploadDir;
+  }
+}
 
 // POST /api/applications  (public - candidate applies)
 async function createApplication(req, res) {
@@ -33,13 +50,17 @@ async function createApplication(req, res) {
       }
     }
 
+    if (!mongoose.Types.ObjectId.isValid(job_id)) {
+      return res.status(400).json({ success: false, message: 'Invalid job_id' });
+    }
+
     // Verify that the job is available
     const job = await Job.findById(job_id);
     if (!job) {
-      return res.status(404).json({ success: false, message: 'The specified job does not exist' });
+      return res.status(404).json({ success: false, message: 'Job not found' });
     }
     if (job.status !== 'active') {
-      return res.status(400).json({ success: false, message: 'This job posting has been closed' });
+      return res.status(400).json({ success: false, message: 'This job is no longer accepting applications' });
     }
     if (job.deadline && new Date() > new Date(job.deadline)) {
       return res.status(400).json({ success: false, message: 'The application deadline for this job has passed' });
@@ -58,10 +79,7 @@ async function createApplication(req, res) {
         resumePath = uploadResult.secure_url || uploadResult.url;
       } catch (cloudErr) {
         console.error('Cloudinary upload error, falling back to local storage:', cloudErr.message);
-        const uploadDir = path.join(__dirname, '..', 'uploads', 'resumes');
-        if (!fs.existsSync(uploadDir)) {
-          fs.mkdirSync(uploadDir, { recursive: true });
-        }
+        const uploadDir = getSafeUploadDir('resumes');
         const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
         const filename = `resume-${unique}${path.extname(req.file.originalname || '.pdf')}`;
         fs.writeFileSync(path.join(uploadDir, filename), req.file.buffer);
@@ -69,10 +87,7 @@ async function createApplication(req, res) {
       }
     } else {
       // Local storage fallback
-      const uploadDir = path.join(__dirname, '..', 'uploads', 'resumes');
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
+      const uploadDir = getSafeUploadDir('resumes');
       const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
       const filename = `resume-${unique}${path.extname(req.file.originalname || '.pdf')}`;
       fs.writeFileSync(path.join(uploadDir, filename), req.file.buffer);
