@@ -1,18 +1,199 @@
-# Public APIs Documentation — CodeClub
+# Backend REST APIs Documentation — Job Portal & CodeClub
 
-This document contains the 4 essential Public REST APIs:
+## 🌐 Production Base URL
 
-1. **News API** (`GET /api/news`)
-2. **Send Message API** (`POST /api/messages`)
-3. **Our Clients API** (`GET /api/clients`)
-4. **Case Studies / Projects API** (`GET /api/projects`)
+- **Production Live URL:** `https://job-portal-eq5r50wh6-malaika4.vercel.app/api`
+- **Local Dev URL:** `http://localhost:5000/api`
 
 ---
 
-## 🌐 Base URL
+## 📑 Quick Navigation
 
-- **Local:** `http://localhost:5000/api` *(or `http://localhost:5000`)*
-- **Vercel Production:** `https://<your-domain>.vercel.app/api`
+1. [Job Details API (`GET /api/jobs/:id`)](#-1-job-details-api-get)
+2. [Job Apply API (`POST /api/applications`)](#-2-job-apply--submit-resume-api-post)
+3. [Get All Active Jobs API (`GET /api/jobs`)](#-3-get-all-active-jobs-api-get)
+4. [Get All News API (`GET /api/news`)](#4-📰-get-all-news-api)
+5. [Send Message / Contact API (`POST /api/messages`)](#5-✉️-send-message--contact-post-api)
+6. [Our Clients API (`GET /api/clients`)](#6-🏢-get-our-clients-api)
+7. [Case Studies / Projects API (`GET /api/projects`)](#7-🚀-get-case-studies--projects-api)
+
+---
+
+## 💼 1. Job Details API (GET)
+
+Fetch complete details of a single job posting by ID.
+
+- **Method:** `GET`
+- **Endpoint:** `/api/jobs/:id` *(fallback: `/jobs/:id`)*
+- **Access:** Public (No Authentication Required)
+- **Full URL Example:** `https://job-portal-eq5r50wh6-malaika4.vercel.app/api/jobs/65e9b8f2a1b2c3d4e5f6a7b8`
+- **Headers:**
+  ```http
+  Content-Type: application/json
+  ```
+- **URL Parameters:**
+  - `id` *(required, string)*: The MongoDB `_id` of the job.
+
+### ✅ Success Response (`200 OK`):
+```json
+{
+  "success": true,
+  "job": {
+    "_id": "65e9b8f2a1b2c3d4e5f6a7b8",
+    "title": "Full Stack Developer",
+    "company": "CodeClub IT Solutions",
+    "location": "Peshawar, Pakistan",
+    "job_type": "Full-Time",
+    "salary": "PKR 100,000 - 150,000 / month",
+    "description": "We are seeking a talented Full Stack Developer to build and maintain web applications.",
+    "requirements": [
+      "2+ years experience with React and Node.js",
+      "Proficient in MongoDB and REST API design",
+      "Experience with Git version control"
+    ],
+    "skills": [
+      "JavaScript",
+      "React",
+      "Node.js",
+      "Express",
+      "MongoDB"
+    ],
+    "deadline": "2026-10-31T00:00:00.000Z",
+    "status": "active",
+    "created_at": "2026-09-01T10:00:00.000Z"
+  }
+}
+```
+
+### ❌ Error Response (`404 Not Found`):
+```json
+{
+  "success": false,
+  "message": "Job not found"
+}
+```
+
+---
+
+## 📝 2. Job Apply / Submit Resume API (POST)
+
+Submit a job application with candidate information and CV/Resume file (PDF).
+
+- **Method:** `POST`
+- **Endpoint:** `/api/applications` *(fallback: `/applications`)*
+- **Access:** Public (No Authentication Required)
+- **Full URL:** `https://job-portal-eq5r50wh6-malaika4.vercel.app/api/applications`
+- **Headers:**
+  ```http
+  Content-Type: multipart/form-data
+  ```
+
+### 📥 Request Body Fields (`multipart/form-data`):
+
+| Field Name | Type | Required | Description | Example |
+| :--- | :--- | :--- | :--- | :--- |
+| `job_id` | String | **Yes** | MongoDB `_id` of the job being applied for | `65e9b8f2a1b2c3d4e5f6a7b8` |
+| `name` | String | **Yes** | Full name of the candidate | `Ahmed Khan` |
+| `email` | String | **Yes** | Valid email address | `ahmed@gmail.com` |
+| `phone` | String | **Yes** | Contact phone / WhatsApp number | `+92 300 1234567` |
+| `linkedin` | String | **Yes** | Valid LinkedIn profile URL | `https://linkedin.com/in/ahmedkhan` |
+| `resume` | File (PDF) | **Yes** | Resume / CV file (Max 10MB) | `resume.pdf` |
+| `address` | String | No | City / Address | `Peshawar, Pakistan` |
+| `education` | String | No | Degree / University | `BS Computer Science, IMSciences` |
+| `experience` | String | No | Years or brief experience | `2 Years in MERN Stack` |
+| `skills` | String | No | Relevant skills list | `React, Node, MongoDB, Express` |
+| `github` | String | No | GitHub profile URL | `https://github.com/ahmedkhan` |
+| `cover_letter`| String | No | Message or cover letter | `I am excited to apply for this position...` |
+
+### ✅ Success Response (`201 Created`):
+```json
+{
+  "success": true,
+  "message": "Application submitted successfully",
+  "applicationId": "65e9c011a1b2c3d4e5f6a7c9",
+  "resume": "/uploads/resumes/resume-1725380000000-123456789.pdf"
+}
+```
+
+### ❌ Error Responses:
+- **400 Bad Request (Missing required fields):**
+  ```json
+  {
+    "success": false,
+    "message": "job_id, name, email, phone, and linkedin are required"
+  }
+  ```
+- **400 Bad Request (Invalid LinkedIn format):**
+  ```json
+  {
+    "success": false,
+    "message": "Please provide a valid LinkedIn profile URL (e.g. https://linkedin.com/in/username)"
+  }
+  ```
+- **400 Bad Request (Missing Resume):**
+  ```json
+  {
+    "success": false,
+    "message": "Resume (PDF) is required"
+  }
+  ```
+- **400 Bad Request (Deadline Passed):**
+  ```json
+  {
+    "success": false,
+    "message": "The application deadline for this job has passed"
+  }
+  ```
+- **404 Not Found (Invalid Job):**
+  ```json
+  {
+    "success": false,
+    "message": "Job not found"
+  }
+  ```
+
+---
+
+## 💼 3. Get All Active Jobs API (GET)
+
+Fetch list of all active jobs with optional search and filter parameters.
+
+- **Method:** `GET`
+- **Endpoint:** `/api/jobs`
+- **Full URL:** `https://job-portal-eq5r50wh6-malaika4.vercel.app/api/jobs`
+- **Optional Query Parameters:**
+  - `search`: Search in title, company, skills (e.g. `/api/jobs?search=Developer`)
+  - `location`: Filter by location (e.g. `/api/jobs?location=Peshawar`)
+  - `job_type`: Filter by type (e.g. `Full-Time`, `Part-Time`, `Remote`, `Internship`)
+  - `page`: Page number (default: `1`)
+  - `limit`: Items per page (default: `10`)
+
+### ✅ Success Response (`200 OK`):
+```json
+{
+  "success": true,
+  "jobs": [
+    {
+      "_id": "65e9b8f2a1b2c3d4e5f6a7b8",
+      "title": "Full Stack Developer",
+      "company": "CodeClub IT Solutions",
+      "location": "Peshawar, Pakistan",
+      "job_type": "Full-Time",
+      "salary": "PKR 100,000 - 150,000",
+      "skills": ["React", "Node.js", "MongoDB"],
+      "status": "active",
+      "deadline": "2026-10-31T00:00:00.000Z",
+      "created_at": "2026-09-01T10:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "total": 1,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 1
+  }
+}
+```
 
 ---
 
