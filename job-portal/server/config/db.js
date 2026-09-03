@@ -9,13 +9,33 @@ if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
 }
 
+function sanitizeMongoUri(rawUri) {
+  if (!rawUri) return '';
+  let uri = String(rawUri).trim();
+  // Remove wrapping quotes if present
+  uri = uri.replace(/^["']+|["']+$/g, '').trim();
+  // If user accidentally pasted the key in value field: MONGODB_URI=...
+  if (uri.startsWith('MONGODB_URI=')) {
+    uri = uri.substring('MONGODB_URI='.length).trim();
+  }
+  uri = uri.replace(/^["']+|["']+$/g, '').trim();
+
+  // If user pasted without protocol prefix: username:pass@cluster0...
+  if (!uri.startsWith('mongodb://') && !uri.startsWith('mongodb+srv://')) {
+    if (uri.includes('.mongodb.net')) {
+      uri = `mongodb+srv://${uri}`;
+    }
+  }
+  return uri;
+}
+
 async function connectDB() {
   // If already connected, reuse existing connection
   if (cached.conn && mongoose.connection.readyState === 1) {
     return cached.conn;
   }
 
-  const uri = process.env.MONGODB_URI;
+  const uri = sanitizeMongoUri(process.env.MONGODB_URI);
   const isServerlessOrProd = Boolean(
     process.env.VERCEL || 
     process.env.AWS_LAMBDA_FUNCTION_NAME || 
@@ -23,13 +43,13 @@ async function connectDB() {
   );
 
   // 1. If MONGODB_URI is provided, connect to it
-  if (uri && uri.trim() && !uri.includes('127.0.0.1') && !uri.includes('localhost')) {
+  if (uri && !uri.includes('127.0.0.1') && !uri.includes('localhost')) {
     if (!cached.promise) {
       const opts = {
         serverSelectionTimeoutMS: 8000,
         bufferCommands: false
       };
-      cached.promise = mongoose.connect(uri.trim(), opts).then((mongooseInstance) => {
+      cached.promise = mongoose.connect(uri, opts).then((mongooseInstance) => {
         console.log('MongoDB Atlas connected successfully');
         return mongooseInstance;
       }).catch((err) => {
