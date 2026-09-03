@@ -39,8 +39,17 @@ function sanitizeMongoUri(rawUri) {
         let hostAndQuery = afterProto.substring(lastAtIdx + 1);
         const colonIdx = authPart.indexOf(':');
         if (colonIdx !== -1) {
-          const rawUser = decodeURIComponent(authPart.substring(0, colonIdx));
-          const rawPass = decodeURIComponent(authPart.substring(colonIdx + 1));
+          let rawUser = decodeURIComponent(authPart.substring(0, colonIdx)).trim();
+          let rawPass = decodeURIComponent(authPart.substring(colonIdx + 1)).trim();
+
+          // Strip < > brackets if user left them in template e.g. <admin>:<password>
+          if (rawUser.startsWith('<') && rawUser.endsWith('>')) {
+            rawUser = rawUser.slice(1, -1).trim();
+          }
+          if (rawPass.startsWith('<') && rawPass.endsWith('>')) {
+            rawPass = rawPass.slice(1, -1).trim();
+          }
+
           const encodedUser = encodeURIComponent(rawUser);
           const encodedPass = encodeURIComponent(rawPass);
 
