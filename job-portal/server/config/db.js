@@ -26,6 +26,44 @@ function sanitizeMongoUri(rawUri) {
       uri = `mongodb+srv://${uri}`;
     }
   }
+
+  // Auto-encode credentials if special characters exist in password
+  try {
+    const protoIdx = uri.indexOf('://');
+    if (protoIdx !== -1) {
+      const proto = uri.substring(0, protoIdx + 3);
+      const afterProto = uri.substring(protoIdx + 3);
+      const lastAtIdx = afterProto.lastIndexOf('@');
+      if (lastAtIdx !== -1) {
+        const authPart = afterProto.substring(0, lastAtIdx);
+        let hostAndQuery = afterProto.substring(lastAtIdx + 1);
+        const colonIdx = authPart.indexOf(':');
+        if (colonIdx !== -1) {
+          const rawUser = decodeURIComponent(authPart.substring(0, colonIdx));
+          const rawPass = decodeURIComponent(authPart.substring(colonIdx + 1));
+          const encodedUser = encodeURIComponent(rawUser);
+          const encodedPass = encodeURIComponent(rawPass);
+
+          // Ensure database name 'job_portal' is present
+          if (hostAndQuery.includes('.mongodb.net')) {
+            const domainEnd = hostAndQuery.indexOf('.mongodb.net') + 12;
+            const domain = hostAndQuery.substring(0, domainEnd);
+            let pathAndQuery = hostAndQuery.substring(domainEnd);
+            if (!pathAndQuery || pathAndQuery === '/' || pathAndQuery.startsWith('/?')) {
+              const queryPart = pathAndQuery.includes('?') ? pathAndQuery.substring(pathAndQuery.indexOf('?')) : '?retryWrites=true&w=majority';
+              pathAndQuery = '/job_portal' + queryPart;
+            }
+            hostAndQuery = domain + pathAndQuery;
+          }
+
+          uri = `${proto}${encodedUser}:${encodedPass}@${hostAndQuery}`;
+        }
+      }
+    }
+  } catch (err) {
+    // If parsing fails, fall back to raw uri
+  }
+
   return uri;
 }
 
